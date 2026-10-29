@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Proof Clinic | SD PromptForger</title>
+<style>
+  :root{--navy:#17334d;--ink:#202b38;--slate:#566577;--edge:#d6dfe9;--wash:#f6f9fc;--white:#fff;--teal:#087f80;--ok:#176343;--okbg:#eff9f2;--err:#9a3432;--errbg:#fff3f1;--gold:#906011}
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:0;color:var(--ink);background:#ecf2f7}
+  .page{max-width:1060px;margin:0 auto;padding:24px 20px 70px;background:white;min-height:100vh;box-shadow:0 5px 35px #17334d12}
+  .eyebrow{font-size:.8rem;color:var(--teal);text-transform:uppercase;font-weight:800;letter-spacing:.11em}
+  h1{font-size:clamp(1.85rem,3.7vw,2.8rem);line-height:1.13;color:var(--navy);margin:.35rem 0 .4rem}
+  h2{font-size:1.35rem;color:var(--navy);margin:0 0 .3rem}
+  h3{font-size:1.06rem;color:var(--navy);margin:0}
+  p{margin:.5rem 0 .9rem}
+  .lead{color:var(--slate);max-width:760px;font-size:1.07rem}
+  .intro{background:linear-gradient(120deg,#e9f6f5,#eff4fa);border-left:4px solid var(--teal);padding:15px 19px;border-radius:11px;margin:20px 0}
+  .intro p:last-child{margin-bottom:0}
+  .topline{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;align-items:center;margin:18px 0 8px}
+  .progressbox{font-weight:700;font-size:.93rem;color:var(--navy)}
+  .track{height:8px;background:#e5eaf0;border-radius:10px;overflow:hidden;margin:10px 0 20px}
+  #fill{height:100%;background:var(--teal);width:0;transition:width .15s}
+  details{border:1px solid var(--edge);border-radius:10px;background:var(--wash);margin:15px 0 25px;overflow:hidden}
+  summary{cursor:pointer;font-weight:700;padding:12px 15px;color:var(--navy)}
+  .details-content{padding:0 17px 14px}
+  .ref-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:9px}
+  .ref-card{background:#fff;border:1px solid var(--edge);border-radius:8px;padding:10px 12px}
+  .ref-card p{margin:3px 0;font-size:.89rem}
+  .round-title{margin:31px 0 9px;border-bottom:2px solid #d3e8e6;padding-bottom:7px}
+  .round-title span{display:inline-block;color:var(--teal);font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;margin-right:8px}
+  .section-description{color:var(--slate);margin-bottom:15px;font-size:.93rem}
+  .question{border:1px solid var(--edge);border-radius:13px;padding:18px 20px;margin:15px 0;background:#fff;transition:border-color .2s}
+  .question.correct{border:2px solid #87c3a6;background:var(--okbg)}
+  .question.incorrect{border:2px solid #e2a5a1;background:var(--errbg)}
+  .qhead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px}
+  .qnum{font-size:.79rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--teal)}
+  .qtitle{font-size:1.06rem;font-weight:720;margin:4px 0 10px}
+  pre.proof{white-space:pre;overflow-x:auto;border:1px solid #d7e0e9;background:#f5f7fa;color:#1b2f42;padding:12px 14px;border-radius:8px;font: .94rem/1.7 ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;margin:9px 0 12px;tab-size:4}
+  .plan-premises{margin-bottom:0!important;border-radius:8px 8px 0 0!important;border-bottom:0!important}
+  .plan-work{border:1px solid #b9cbdc;border-top:0;border-bottom:0;background:repeating-linear-gradient(to bottom, #fff 0px, #fff 32px, #e6edf4 33px, #fff 34px);padding:10px 12px;min-height:202px}
+  .plan-work textarea{display:block;width:100%;min-height:182px;resize:vertical;border:none;background:transparent;font:1rem/34px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#213a4f;padding:0;outline-offset:1px;white-space:pre;tab-size:3}
+  .plan-goal{border:1px solid #b9cbdc;background:#eaf3f2;padding:10px 13px;border-radius:0 0 8px 8px;margin-bottom:14px;font:700 .99rem/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow:auto}
+  .reason-label{display:block;font-weight:700;margin-top:13px;margin-bottom:5px}
+  .reason-input{display:block;width:100%;min-height:70px;border-radius:8px;border:1px solid #b9cbdc;padding:10px;font:inherit;resize:vertical;background:white}
+  .reason-hint{font-size:.82rem;color:var(--slate);margin-top:4px}
+  .formula{font:1rem/1.7 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:#f6f8fb;border:1px solid #e0e6ee;border-radius:8px;padding:10px 12px;margin:7px 0 13px;overflow:auto}
+  fieldset{padding:0;border:0;margin:0}
+  legend{font-size:.9rem;font-weight:700;color:#3b4d60;margin-bottom:6px}
+  .choice{display:flex;align-items:flex-start;gap:9px;border:1px solid #e2e7ee;padding:8px 10px;margin:6px 0;border-radius:8px;cursor:pointer;background:#fff}
+  .choice:hover:has(input:not(:disabled)){border-color:#7babae;background:#f7fcfc}
+  .choice input{margin-top:4px;accent-color:var(--teal);flex-shrink:0}
+  .choice:has(input:checked){border-color:var(--teal);background:#eefafa}
+  .confidence{margin-top:14px;border-top:1px dashed var(--edge);padding-top:12px}
+  .confidence-options{display:flex;flex-wrap:wrap;gap:8px 17px;font-size:.9rem}
+  .confidence-options label{display:flex;gap:5px;align-items:center;cursor:pointer}
+  .confidence-options input{accent-color:var(--teal)}
+  .feedback{margin-top:14px;padding:11px 13px;border-radius:9px;background:#fff;border:1px solid var(--edge);display:none}
+  .feedback.show{display:block}
+  .feedback .correct-word{color:var(--ok)}
+  .feedback .incorrect-word{color:var(--err)}
+  .feedback p:last-child{margin-bottom:0}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0}
+  button{border-radius:9px;border:1px solid transparent;padding:11px 16px;font:700 .97rem system-ui,sans-serif;cursor:pointer;transition:filter .15s}
+  button:hover:enabled{filter:brightness(.96)}
+  button:focus-visible,input:focus-visible,summary:focus-visible,textarea:focus-visible{outline:3px solid #75bab6;outline-offset:2px}
+  button:disabled{opacity:.46;cursor:not-allowed}
+  .primary{background:var(--navy);color:white}
+  .teal{background:var(--teal);color:white}
+  .light{background:#edf2f6;color:var(--navy);border-color:#d5e1e8}
+  .reset{background:#fff;color:#8c3939;border-color:#d7aaa8}
+  .warning{display:none;border:1px solid #f3c57b;color:#6f490d;border-radius:9px;background:#fff9ee;padding:11px 14px;margin:10px 0}
+  .warning.show{display:block}
+  .results,.prompt-panel{display:none;margin-top:21px;padding:20px;border-radius:13px;border:1px solid var(--edge);background:var(--wash)}
+  .results.show,.prompt-panel.show{display:block}
+  .big-score{font-size:1.5rem;font-weight:800;color:var(--navy)}
+  .small{font-size:.89rem;color:var(--slate)}
+  .skills{margin:14px 0 0}
+  .skill{display:grid;grid-template-columns:minmax(170px,1fr) 66px minmax(120px,.65fr);gap:10px;border-bottom:1px solid var(--edge);padding:9px 0;align-items:center}
+  .skill:last-child{border-bottom:0}
+  .mark-good{color:var(--ok);font-weight:700}.mark-bad{color:var(--err);font-weight:700}.mark-mid{color:var(--gold);font-weight:700}
+  .prompt-panel textarea{width:100%;min-height:360px;resize:vertical;border:1px solid var(--edge);border-radius:8px;padding:13px;font:.83rem/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:white}
+  .kicker{font-size:.79rem;text-transform:uppercase;font-weight:800;letter-spacing:.08em;color:var(--teal)}
+  .footer{border-top:1px solid var(--edge);padding-top:17px;margin-top:35px;color:var(--slate);font-size:.85rem}
+  @media(max-width:600px){.page{padding:20px 13px 46px}.question{padding:14px 13px}.skill{grid-template-columns:1fr 60px}.skill .status{grid-column:1 / -1}pre.proof{font-size:.79rem}}
+  @media print{.page{box-shadow:none}.toolbar,.confidence,#promptPanel{display:none!important}.question{break-inside:avoid}}
+</style>
+</head>
+<body>
+<main class="page">
+  <div class="eyebrow">PHIL 106 · Symbolic Logic · PromptForger</div>
+  <h1>Proof Clinic: Debugging Derivations in SD</h1>
+  <p class="lead">Practice the rules of SD through embedded compounds, complete justifications, subderivation scope, and strategic proof planning.</p>
+  <div class="intro">
+    <strong>First think; then check; then consult your ALEX.</strong>
+    <p>Answer every multiple-choice question and select a confidence rating. When you click <strong>Check Answers</strong>, your selections will be locked and you'll receive specific feedback. Your <strong>Generate ALEX Debrief</strong> button will then produce a personalized tutoring prompt.</p>
+    <p><strong>Important:</strong> The rule of inference applies to the <em>whole accessible sentence</em>, not just a connective embedded inside it. A line beginning with a conditional does not become a conjunction simply because its consequent contains <code>&amp;</code>.</p><p>For the proof-planning questions, examine the premises and the conclusion, then decide which <strong>subderivation rule</strong> would most naturally help. Use the open space to sketch possible steps, and write a brief explanation of <em>why</em> you chose your plan. Your writing is not auto-graded, but it accompanies your answers in your ALEX debrief.</p>
+  </div>
+  <details>
+    <summary>Reference: SD rules, main connectives, and subderivation scope</summary>
+    <div class="details-content">
+      <div class="ref-grid">
+        <div class="ref-card"><h3>Inspect the main connective</h3><p>In <code>A ⊃ (B &amp; C)</code>, the main connective is <code>⊃</code>. In <code>A &amp; (B ⊃ C)</code>, the main connective is <code>&amp;</code>.</p></div>
+        <div class="ref-card"><h3>Conjunction Elimination (&amp;E)</h3><p>From an accessible conjunction <code>P &amp; Q</code>, infer <code>P</code> or <code>Q</code>—a <em>whole</em> conjunct. You cannot skip into a conjunct’s internal structure in one step.</p></div>
+        <div class="ref-card"><h3>Conditional Elimination (⊃E)</h3><p>From an accessible <code>P ⊃ Q</code> and <code>P</code>, infer the entire consequent <code>Q</code>.</p></div>
+        <div class="ref-card"><h3>Conditional Introduction (⊃I)</h3><p>Assume <code>P</code> in a subderivation, derive <code>Q</code> within it, then end that subderivation and assert <code>P ⊃ Q</code> at the parent indentation level. Cite the full subderivation range.</p></div>
+        <div class="ref-card"><h3>Nested subderivations</h3><p>After closing an inner subderivation, return exactly one indentation level left. After closing the outer subderivation, return left again.</p></div>
+        <div class="ref-card"><h3>Negation Introduction (~I)</h3><p>To prove <code>~P</code>, assume <code>P</code> and derive a sentence and its negation within that subderivation. Close it and infer <code>~P</code> outside.</p></div>
+        <div class="ref-card"><h3>Negation Elimination (~E)</h3><p>To prove <code>P</code>, assume <code>~P</code> and derive a sentence and its negation within that subderivation. Close it and infer <code>P</code> outside.</p></div>
+        <div class="ref-card"><h3>Biconditional Introduction (≡I)</h3><p>Complete two subderivations, one from the left side to the right side and one in the reverse direction. Cite both ranges to establish the biconditional.</p></div>
+        <div class="ref-card"><h3>Disjunction Elimination (∨E)</h3><p>From <code>P ∨ Q</code>, open one subderivation assuming <code>P</code> and another assuming <code>Q</code>; derive the same target in both, then cite the disjunction and both ranges.</p></div>
+        <div class="ref-card"><h3>Accessible lines</h3><p>Outside a finished subderivation, its interior lines cannot be used directly. You can cite a properly completed subderivation as a whole for a rule that requires it.</p></div>
+      </div>
+      <p class="small">These five rules require subderivations in basic SD: <strong>⊃I</strong>, <strong>~I</strong>, <strong>~E</strong>, <strong>≡I</strong>, and <strong>∨E</strong>. The rule is applied <em>after</em> the relevant subderivation(s) have ended, at the enclosing indentation level.</p>
+      <p class="small">A vertical bar <code>│</code> indicates one open subderivation; <code>│ │</code> indicates two nested subderivations. Rules shown here are from basic SD, not the expanded shortcut system SD+.</p>
+    </div>
+  </details>
+  <div class="topline"><strong id="attemptName">Independent attempt · 19 questions</strong><div class="progressbox" id="progressText" aria-live="polite">0 of 19 answers · 0 of 19 confidence ratings</div></div>
+  <div class="track" aria-hidden="true"><div id="fill"></div></div>
+  <div id="quiz"></div>
+  <div id="warning" class="warning" role="alert"></div>
+  <div class="toolbar">
+    <button id="check" class="primary" type="button">Check Answers</button>
+    <button id="retry" class="light" type="button" disabled>Retry Missed Questions</button>
+    <button id="generate" class="teal" type="button" disabled>Generate ALEX Debrief</button>
+    <button id="reset" class="reset" type="button">Reset</button>
+  </div>
+  <section id="results" class="results" aria-live="polite"><h2>Diagnostic results</h2><div class="big-score" id="score"></div><p class="small">These small skill samples are learning signals, not formal measurements. High-confidence errors deserve special attention.</p><div id="skills" class="skills"></div><p id="nextSteps"></p></section>
+  <section id="promptPanel" class="prompt-panel"><div class="kicker">Your personalized ALEX</div><h2>Generated debrief prompt</h2><p>This prompt contains your responses, confidence ratings, and the SD knowledge base. Copy it into your LLM chat for one-question-at-a-time coaching.</p><textarea id="prompt" readonly spellcheck="false" aria-label="Personalized ALEX prompt"></textarea><div class="toolbar"><button type="button" id="copy" class="primary">Copy Prompt</button></div><p class="small" id="copyMessage" role="status"></p></section>
+  <div class="footer">PHIL 106 · Proof Clinic PromptForger. Practice problems develop skills for validity, theorem, and inconsistency proofs. Examples are not solutions to assigned homework. Answers and draft proof plans remain in your browser unless you choose to copy them into an ALEX conversation.</div>
+</main>
+<script>
+"use strict";
+const CORE = [
+{n:1,round:"1 · Read the whole sentence",skill:"Main connective and embedded compounds",title:"A conjunction inside a conditional",stem:"A student wants to use &E directly on this line. Which assessment is correct?",formula:"A ⊃ (B & (C ∨ D))",choices:["The main connective is &; &E gives B.","The main connective is ⊃; &E cannot be applied to this line as it stands.","The main connective is ∨; ∨E gives C.","The main connective is &; &E gives C ∨ D."],correct:1,explain:"The whole sentence is a conditional. The conjunction belongs to its consequent. First obtain the entire consequent using ⊃E with the antecedent available; only then can &E break that conjunction apart."},
+{n:2,round:"1 · Read the whole sentence",skill:"Main connective and embedded compounds",title:"The outer connective controls the rule",stem:"What is the main connective of this complete sentence?",formula:"[(A & ~B) ⊃ (C ∨ D)]",choices:["& (because the antecedent contains a conjunction)","~ (because B is negated)","⊃ (the conditional connecting two larger parts)","∨ (because the consequent contains a disjunction)"],correct:2,explain:"The outermost connective connects the antecedent (A & ~B) to the consequent (C ∨ D). Its main connective is ⊃; the other connectives are embedded."},
+{n:3,round:"1 · Read the whole sentence",skill:"Main connective and embedded compounds",title:"One application means one layer",stem:"Which result can be obtained in ONE application of &E from the displayed sentence?",formula:"[A & (B ⊃ C)] & ~D",choices:["A","B ⊃ C","A & (B ⊃ C)","D"],correct:2,explain:"One application of &E yields a full immediate conjunct: either [A & (B ⊃ C)] or ~D. Deriving A or (B ⊃ C) from the left conjunct requires another step."},
+{n:4,round:"2 · Justify the inference",skill:"Rules and citations",title:"Detach a compound consequent",stem:"Choose the complete justification for line 3.",proof:"1.  (A & B) ⊃ (C ∨ ~D)     Assumption (premise)\n2.  A & B                  Assumption (premise)\n3.  C ∨ ~D                 __________",choices:["1 &E","1, 2 ⊃E","2 ∨I","1, 2 &I"],correct:1,explain:"Line 2 exactly matches the antecedent of the conditional on line 1. Conditional Elimination (⊃E) yields the entire consequent C ∨ ~D, supported by lines 1 and 2."},
+{n:5,round:"2 · Justify the inference",skill:"Rules and citations",title:"Extract the entire conjunct",stem:"What is the correct justification for line 2?",proof:"1.  A & [B ⊃ (C ∨ D)]      Assumption (premise)\n2.  B ⊃ (C ∨ D)            __________",choices:["1 ⊃E","1 &E","1 ∨E","1 ~E"],correct:1,explain:"The main connective on line 1 is &. The entire right conjunct is B ⊃ (C ∨ D). One application of &E extracts that complete conjunct without going inside it."},
+{n:6,round:"2 · Justify the inference",skill:"Rules and citations",title:"Cite the complete subderivation",stem:"Which citation and rule correctly justify line 5?",proof:"1.  A ⊃ (B & C)       Assumption (premise)\n2.  │ A               Assumption\n3.  │ B & C           1, 2 ⊃E\n4.  │ C               3 &E\n5.  A ⊃ C             __________",choices:["3, 4 &I","4 ⊃E","2–3 ⊃I","2–4 ⊃I"],correct:3,explain:"For ⊃I, the cited range starts with assumption A at line 2 and ends with C at line 4. The subderivation 2–4 licenses A ⊃ C outside it. Range 2–3 would license A ⊃ (B & C), not A ⊃ C."},
+{n:7,round:"3 · Control the indentation",skill:"Subderivation scope",title:"Where does the discharged conditional go?",stem:"Choose the correct indentation level for line 4. The justification on that line is already given.",proof:"1.  A & (B ⊃ C)           Assumption (premise)\n2.  │ D                   Assumption\n3.  │ B ⊃ C               1 &E\n4.  ? D ⊃ (B ⊃ C)         2–3 ⊃I",choices:["At the same indentation as line 3, inside D's subderivation","One level farther right than line 3","At the outer level, aligned with line 1","The formula must appear on a new, unrelated subderivation"],correct:2,explain:"Conditional Introduction ends the temporary subderivation begun by D on line 2. The resulting conditional belongs at the outer level, aligned with the premise on line 1."},
+{n:8,round:"3 · Control the indentation",skill:"Subderivation scope",title:"A closed line cannot be cited directly",stem:"Line 5 is outside the closed subderivation. Which justification would legitimately allow the indicated sentence on line 5?",proof:"1.  P & (Q ∨ R)             Assumption (premise)\n2.  │ S                     Assumption\n3.  │ Q ∨ R                 1 &E\n4.  S ⊃ (Q ∨ R)             2–3 ⊃I\n5.  Q ∨ R                  __________",choices:["3 R, because line 3 is earlier in the proof","4 ⊃E, without any other line","1 &E, because the outer premise remains accessible","2–3 &E, because a closed subderivation is a conjunction"],correct:2,explain:"Line 3 is inside a closed subderivation and is no longer directly available for Reiteration. But line 1 remains accessible at the outer level, so 1 &E legitimately derives Q ∨ R anew."},
+{n:9,round:"3 · Control the indentation",skill:"Subderivation scope",title:"Close the inner, not the outer, subderivation",stem:"This is a theorem proof with no premises. Where should line 4 be indented?",proof:"1.  │ A                       Assumption\n2.  │ │ B                     Assumption\n3.  │ │ A & B                 1, 2 &I\n4.  ? B ⊃ (A & B)           2–3 ⊃I\n5.  A ⊃ [B ⊃ (A & B)]       1–4 ⊃I",choices:["At the deepest indentation, aligned with line 3","One level left of line 3, still inside the A subderivation","At the outermost level, aligned with line 5","Two levels farther right, starting another subderivation"],correct:1,explain:"Line 4 closes only the B subderivation (lines 2–3). It returns to the A subderivation, at one indentation level. Line 5 then closes that outer A subderivation (lines 1–4), leaving a theorem with no undischarged assumptions."},
+{n:10,round:"4 · Debug and repair",skill:"Proof debugging and repair",title:"The deceptive & in the consequent",stem:"The student labels line 3 as shown. What is the first error?",proof:"1.  A ⊃ [B & (C ∨ D)]        Assumption (premise)\n2.  A                        Assumption (premise)\n3.  B                        1 &E   ← student's step",choices:["No error: any occurrence of & permits &E on the whole line","Line 2 should have been a negation","Line 1's main connective is ⊃, not &; first derive B & (C ∨ D) using 1, 2 ⊃E","The right rule is ∨I, because D appears in the sentence"],correct:2,explain:"The & is embedded inside the consequent of a conditional. You cannot use &E directly on line 1. First use ⊃E on lines 1 and 2 to derive B & (C ∨ D); then use &E on that new conjunction."},
+{n:11,round:"4 · Debug and repair",skill:"Proof debugging and repair",title:"Repair an illegal exit",stem:"Line 4 has the correct sentence but the wrong indentation: the student left the subderivation too early. Which repair works?",proof:"1.  A ⊃ (B & C)      Assumption (premise)\n2.  │ A              Assumption\n3.  │ B & C          1, 2 ⊃E\n4.  B                3 &E   ← student's step",choices:["Keep B at the outer level: citing line 3 is enough","Move B inside the A subderivation; then add A ⊃ B outside, citing 2–4 ⊃I","Close the subderivation at line 3 and assert A ⊃ B with 2–3 ⊃I","Leave B outside and replace its justification with 2, 3 &I"],correct:1,explain:"B was derived using line 3, which is inside the A subderivation, so B must still be inside. After obtaining B there, the student can close the subderivation and infer A ⊃ B by citing the full range 2–4."},
+{n:12,round:"5 · Plan an inconsistency proof",skill:"Inconsistency proof strategy",title:"Find the contradiction without unauthorized shortcuts",stem:"These three sentences are assumed. What is the most direct plan to show that the set is inconsistent?",proof:"1.  (A & B) ⊃ (C ∨ D)       Assumption\n2.  A & B                   Assumption\n3.  ~(C ∨ D)                Assumption",choices:["Apply &E directly to line 1 and infer C","Use 1, 2 ⊃E to derive C ∨ D, which contradicts line 3","Apply &E to line 3 to obtain ~C and ~D","Assume C and then infer D without any other rule"],correct:1,explain:"Line 2 supplies the exact antecedent of line 1. By ⊃E you obtain C ∨ D, while line 3 already asserts ~(C ∨ D). These opposing sentences establish inconsistency; there is no need to extract C or D individually."},
+{n:13,round:"6 · Plan the subderivation",skill:"Subderivation rule selection",title:"Build a conditional from these premises",stem:"The premises are above and the goal is below. Choose the best direct plan; use the workspace to sketch steps before committing.",planPremises:"1.  (A & B) ⊃ (C ∨ D)      Assumption (premise)\n2.  A ⊃ B                  Assumption (premise)",goal:"A ⊃ (C ∨ D)",needReason:true,choices:["Use ⊃I: assume A, derive B and A & B, obtain C ∨ D, then close the A subderivation.","Use &E on premise 1 to extract A & B immediately.","Use ∨E by assuming C in one subderivation and D in another before deriving C ∨ D.","Use ≡I by deriving the reverse conditional as well."],correct:0,explain:"The target has main connective ⊃. To introduce that conditional, assume its antecedent A, derive the whole consequent C ∨ D inside, then discharge A with ⊃I."},
+{n:14,round:"6 · Plan the subderivation",skill:"Subderivation rule selection",title:"What would establish this negation?",stem:"Choose a rule and an opening assumption that could lead to the target negation.",planPremises:"1.  P ⊃ (Q & R)          Assumption (premise)\n2.  ~Q                    Assumption (premise)",goal:"~P",needReason:true,choices:["Use ~I: assume P, infer Q & R and then Q; use Q and ~Q as a contradiction and discharge P.","Use ~E: assume ~P and aim for P without using the premises.","Apply &E directly to line 1 because Q & R occurs there.","Use ≡I: establish P ≡ Q by two subderivations."],correct:0,explain:"Since the goal is ~P, start a subderivation assuming P. That yields Q via the conditional, contradicting ~Q; close the P subderivation by ~I."},
+{n:15,round:"6 · Plan the subderivation",skill:"Subderivation rule selection",title:"A positive conclusion without a direct path",stem:"The goal is a conjunction, but the premises do not provide it directly. Which plan leads to the goal using basic SD?",planPremises:"1.  ~(A & B) ⊃ (C ∨ D)    Assumption (premise)\n2.  ~(C ∨ D)              Assumption (premise)",goal:"A & B",needReason:true,choices:["Use ~E: assume ~(A & B), derive C ∨ D, contradict premise 2, then discharge ~(A & B) to infer A & B.","Use ~I: assume A & B, get a contradiction, and conclude A & B.","Apply &E to line 1 to derive A and B independently.","Use ⊃I: assume C ∨ D and conclude A & B."],correct:0,explain:"To infer A & B by ~E in basic SD, assume its negation ~(A & B) and derive a contradiction: C ∨ D and ~(C ∨ D). Close the subderivation and infer A & B."},
+{n:16,round:"6 · Plan the subderivation",skill:"Subderivation rule selection",title:"Establish both directions",stem:"Which arrangement of subderivations would justify the goal using the premises?",planPremises:"1.  (A & B) ⊃ (C ∨ D)   Assumption (premise)\n2.  (C ∨ D) ⊃ (A & B)   Assumption (premise)",goal:"(A & B) ≡ (C ∨ D)",needReason:true,choices:["Use ≡I: assume A & B and derive C ∨ D; in a second subderivation assume C ∨ D and derive A & B; cite both ranges.","Use ≡E directly on line 1 because its consequent contains a disjunction.","Use ⊃I on just the first premise; one direction is sufficient to derive the biconditional.","Use ∨E on premise 2 by splitting into cases C and D."],correct:0,explain:"≡I requires two completed subderivations, one in each direction, even though both supporting sentences happen to be conditionals. The final biconditional cites both ranges."},
+{n:17,round:"6 · Plan the subderivation",skill:"Subderivation rule selection",title:"Two alternative starting points",stem:"The first premise is a disjunction of compound sentences. How can we establish the same target regardless of which disjunct holds?",planPremises:"1.  (A & B) ∨ (C & D)       Assumption (premise)\n2.  (A & B) ⊃ (E ∨ F)       Assumption (premise)\n3.  (C & D) ⊃ (E ∨ F)       Assumption (premise)",goal:"E ∨ F",needReason:true,choices:["Use ∨E: assume A & B in one subderivation and C & D in another; derive E ∨ F in each, then cite the disjunction and both ranges.","Use ∨I directly on line 1 to extract E ∨ F.","Use &E on line 1 because each disjunct contains a conjunction.","Use ⊃I by assuming E ∨ F and deriving a premise."],correct:0,explain:"∨E is reasoning by cases: derive E ∨ F separately from A & B and from C & D, then cite the disjunction and both full subderivation ranges."},
+{n:18,round:"7 · Justify completed subderivations",skill:"Subderivation range citations",title:"Cite BOTH completed subderivations",stem:"All proof steps are correct. Which complete justification belongs on line 7?",proof:"1.  (A & B) ⊃ (C ∨ D)     Assumption (premise)\n2.  (C ∨ D) ⊃ (A & B)     Assumption (premise)\n3.  │ A & B               Assumption\n4.  │ C ∨ D               1, 3 ⊃E\n5.  │ C ∨ D               Assumption\n6.  │ A & B               2, 5 ⊃E\n7.  (A & B) ≡ (C ∨ D)     __________",choices:["3–4, 5–6 ≡I","1, 2 ≡E","3–6 ⊃I","3, 6 &I"],correct:0,explain:"≡I requires TWO distinct, completed subderivations: lines 3–4 establish one direction, and lines 5–6 establish the other. Both ranges must be cited."},
+{n:19,round:"7 · Justify completed subderivations",skill:"Subderivation range citations",title:"Cite the disjunction AND both cases",stem:"The two cases each establish E & F. What full justification licenses the outer-level conclusion on line 8?",proof:"1.  (A & B) ∨ (C & D)      Assumption (premise)\n2.  (A & B) ⊃ (E & F)      Assumption (premise)\n3.  (C & D) ⊃ (E & F)      Assumption (premise)\n4.  │ A & B                Assumption\n5.  │ E & F                2, 4 ⊃E\n6.  │ C & D                Assumption\n7.  │ E & F                3, 6 ⊃E\n8.  E & F                  __________",choices:["5, 7 &I","1, 4–5, 6–7 ∨E","2, 3 ⊃E","4–7 ⊃I"],correct:1,explain:"∨E requires the accessible disjunction on line 1 AND both completed case subderivations 4–5 and 6–7. Each case derives the same compound E & F."}
+
+];
+// One structurally parallel, previously unseen variant for each initial question.
+const RETRY = [
+{n:1,formula:"P ⊃ [(Q ∨ R) & ~S]",stem:"Can &E be used directly on this whole line to infer Q ∨ R?",choices:["Yes, because its consequent has &","No: ⊃ is the main connective of this line","Yes, because Q ∨ R is a disjunction","No, because &E is never used with compound conjuncts"],correct:1,explain:"The line as a whole is a conditional. Derive its consequent with ⊃E first, provided you have P."},
+{n:2,formula:"~[(P & Q) ⊃ (R ∨ S)]",stem:"Which connective governs the whole displayed sentence?",choices:["~","&","⊃","∨"],correct:0,explain:"The outermost symbol is negation. The conditional and its components occur inside the negation's scope."},
+{n:3,formula:"[P ∨ (Q & R)] & (S ⊃ T)",stem:"Which of these is an immediate result of ONE &E step?",choices:["Q & R","P","S ⊃ T","T"],correct:2,explain:"The right immediate conjunct is S ⊃ T. Q & R is embedded inside the left disjunctive conjunct."},
+{n:4,proof:"1.  (P ∨ Q) ⊃ (R & ~S)     Assumption (premise)\n2.  P ∨ Q                  Assumption (premise)\n3.  R & ~S                 __________",stem:"Which is the correct justification for line 3?",choices:["1, 2 ⊃E","1 &E","2 ∨E","1, 2 &I"],correct:0,explain:"The entire antecedent P ∨ Q is available on line 2, so ⊃E gives the entire consequent R & ~S."},
+{n:5,proof:"1.  (P ∨ Q) & [R ⊃ (S & T)]   Assumption (premise)\n2.  R ⊃ (S & T)             __________",stem:"What is the correct rule and citation for line 2?",choices:["1 ⊃E","1 ∨E","1 &E","1, 2 &I"],correct:2,explain:"Line 1's main connective is &, so &E gives its whole right conjunct R ⊃ (S & T)."},
+{n:6,proof:"1.  P ⊃ (Q ∨ R)       Assumption (premise)\n2.  │ P               Assumption\n3.  │ Q ∨ R           1, 2 ⊃E\n4.  │ (Q ∨ R) ∨ S     3 ∨I\n5.  P ⊃ [(Q ∨ R) ∨ S]  _______",stem:"What justifies line 5?",choices:["2–4 ⊃I","2–3 ⊃I","3 ∨I","1, 4 ⊃E"],correct:0,explain:"The full subderivation begins with P at line 2 and ends with (Q ∨ R) ∨ S at line 4, supporting the target conditional."},
+{n:7,proof:"1.  (P ∨ Q) & (R ⊃ S)      Assumption (premise)\n2.  │ T                    Assumption\n3.  │ R ⊃ S                1 &E\n4.  ? T ⊃ (R ⊃ S)         2–3 ⊃I",stem:"At what indentation level should line 4 appear?",choices:["The same as line 3","One farther right than line 3","At the outer level with line 1","In a separate new subderivation"],correct:2,explain:"⊃I closes the T subderivation; line 4 returns to the outer level."},
+{n:8,proof:"1.  (P ⊃ Q) & R        Assumption (premise)\n2.  │ S                Assumption\n3.  │ P ⊃ Q            1 &E\n4.  S ⊃ (P ⊃ Q)        2–3 ⊃I\n5.  P ⊃ Q              _______",stem:"Which justification legitimately supports line 5 outside the subderivation?",choices:["3 R","1 &E","2–3 R","4 ⊃E"],correct:1,explain:"Line 3 is closed off, but line 1 remains directly accessible. Its left conjunct is P ⊃ Q."},
+{n:9,proof:"1.  │ P                      Assumption\n2.  │ │ (Q ∨ R)              Assumption\n3.  │ │ P & (Q ∨ R)          1, 2 &I\n4.  ? (Q ∨ R) ⊃ [P & (Q ∨ R)]  2–3 ⊃I\n5.  P ⊃ [(Q ∨ R) ⊃ [P & (Q ∨ R)]]  1–4 ⊃I",stem:"Where does line 4 belong?",choices:["Outermost, with line 5","One level left of line 3, still inside P's subderivation","At the same level as line 3","Outside all proof blocks and without any justification"],correct:1,explain:"Line 4 discharges only the inner (Q ∨ R) assumption. The outer P assumption remains open until line 5."},
+{n:10,proof:"1.  P ⊃ [(Q ∨ R) & S]     Assumption (premise)\n2.  P                      Assumption (premise)\n3.  S                      1 &E  ← student's step",stem:"What is wrong with line 3?",choices:["Nothing; S is part of the consequent","The main connective on line 1 is ⊃, so first detach the conjunction with 1, 2 ⊃E","The step should cite only line 2 with &E","The statement S requires ∨I on line 1"],correct:1,explain:"To extract S you need the consequent [(Q ∨ R) & S] on a separate accessible line first."},
+{n:11,proof:"1.  P ⊃ (Q & R)     Assumption (premise)\n2.  │ P             Assumption\n3.  │ Q & R         1, 2 ⊃E\n4.  R               3 &E  ← student's step",stem:"Which repair restores the proper subderivation scope?",choices:["Keep R outside because R is true","Move R inside; then infer P ⊃ R outside by 2–4 ⊃I","Use 2–3 ⊃I to justify P ⊃ R","Cite line 1 with &E from outside"],correct:1,explain:"R is reached from line 3 inside the P subderivation. Place R inside, then close the block to infer P ⊃ R."},
+{n:12,proof:"1.  [P & (Q ⊃ R)] ⊃ (S & T)    Assumption\n2.  P & (Q ⊃ R)               Assumption\n3.  ~(S & T)                  Assumption",stem:"Which plan directly produces an explicit contradiction?",choices:["Use 1, 2 ⊃E to derive S & T, contradicting line 3","Apply &E to line 1 to derive S","Apply &E to line 3 to derive ~S","Derive R directly from 2 with &E"],correct:0,explain:"The matching antecedent on line 2 permits ⊃E on 1 and 2, yielding the entire consequent S & T. This directly contradicts ~(S & T)."},
+{n:13,planPremises:"1.  (P ∨ Q) ⊃ (R & S)      Assumption (premise)\n2.  P ⊃ (P ∨ Q)            Assumption (premise)",goal:"P ⊃ (R & S)",stem:"What is the most direct plan to derive the conditional at the bottom?",choices:["Use ⊃I: assume P, derive P ∨ Q, then R & S, and discharge P.","Apply &E to premise 1 immediately to get R.","Use ≡I by proving the reverse conditional as well.","Use ~E by assuming R & S."],correct:0,explain:"To prove P ⊃ (R & S), assume P; derive the consequent and then close that subderivation with ⊃I."},
+{n:14,planPremises:"1.  (P ∨ Q) ⊃ (R & S)   Assumption (premise)\n2.  ~R                   Assumption (premise)",goal:"~(P ∨ Q)",stem:"What assumption and rule would directly establish the negated compound goal?",choices:["Use ~I: assume P ∨ Q; derive R & S and then R, contradict ~R.","Use ~E: assume ~(P ∨ Q) and then assert ~(P ∨ Q).","Use &E directly on the conditional in line 1.","Use ≡I by deriving P ≡ Q."],correct:0,explain:"A negated goal invites ~I: assume the unnegated sentence, derive a sentence and its negation, then discharge."},
+{n:15,planPremises:"1.  ~(P ∨ Q) ⊃ (R & S)   Assumption (premise)\n2.  ~(R & S)             Assumption (premise)",goal:"P ∨ Q",stem:"Which subderivation plan directly yields the positive disjunction?",choices:["Use ~E: assume ~(P ∨ Q), derive R & S, contradict premise 2, and discharge the assumption.","Use ∨E by splitting premise 1 into cases P and Q.","Use &E on premise 2 to derive ~R and ~S.","Use ⊃I by assuming P ∨ Q."],correct:0,explain:"~E licenses P ∨ Q after a subderivation assuming its negation yields an explicit contradiction."},
+{n:16,planPremises:"1.  (P ∨ Q) ⊃ (R & S)   Assumption (premise)\n2.  (R & S) ⊃ (P ∨ Q)   Assumption (premise)",goal:"(P ∨ Q) ≡ (R & S)",stem:"Which subderivation arrangement supports the biconditional?",choices:["Use ≡I with separate cases assuming P ∨ Q and R & S, deriving the opposite side in each.","Use ≡E on the first conditional.","Use a single ⊃I subderivation; the reverse direction is unnecessary.","Use ∨E directly on the first conditional."],correct:0,explain:"Two directions, two subderivations, and two cited ranges are required by ≡I."},
+{n:17,planPremises:"1.  (P ∨ Q) ∨ (R & S)         Assumption (premise)\n2.  (P ∨ Q) ⊃ (T & U)         Assumption (premise)\n3.  (R & S) ⊃ (T & U)         Assumption (premise)",goal:"T & U",stem:"Which rule handles the two ways the first premise could hold?",choices:["Use ∨E with separate subderivations assuming P ∨ Q and R & S, each deriving T & U.","Use &E directly on premise 1 to derive R.","Use ⊃I by assuming T & U.","Use ∨I to conclude T & U from line 1."],correct:0,explain:"∨E requires two case subderivations beginning with the disjuncts and ending with the same target."},
+{n:18,proof:"1.  (P ∨ Q) ⊃ (R & S)   Assumption (premise)\n2.  (R & S) ⊃ (P ∨ Q)   Assumption (premise)\n3.  │ P ∨ Q             Assumption\n4.  │ R & S             1, 3 ⊃E\n5.  │ R & S             Assumption\n6.  │ P ∨ Q             2, 5 ⊃E\n7.  (P ∨ Q) ≡ (R & S)   ________",stem:"Which rule and ranges justify line 7?",choices:["3–4, 5–6 ≡I","1, 2 ≡I","3–6 ⊃I","4, 6 &I"],correct:0,explain:"Biconditional Introduction cites the two completed subderivation ranges 3–4 and 5–6."},
+{n:19,proof:"1.  (P ∨ Q) ∨ (R & S)      Assumption (premise)\n2.  (P ∨ Q) ⊃ (T ∨ U)      Assumption (premise)\n3.  (R & S) ⊃ (T ∨ U)      Assumption (premise)\n4.  │ P ∨ Q                Assumption\n5.  │ T ∨ U                2, 4 ⊃E\n6.  │ R & S                Assumption\n7.  │ T ∨ U                3, 6 ⊃E\n8.  T ∨ U                  __________",stem:"Which justification licenses line 8?",choices:["2, 3 ⊃E","1, 4–5, 6–7 ∨E","4, 6 &I","5–7 ⊃I"],correct:1,explain:"The ∨E citation must include the disjunction and both complete case ranges: 1, 4–5, 6–7."}
+
+];
+// Reorder choices while preserving the true answer index.
+const OPTION_ORDERS = {13:[1,3,0,2],14:[2,0,3,1],15:[1,3,2,0],16:[0,3,1,2],17:[2,3,0,1],18:[1,0,2,3],19:[0,2,3,1]};
+for(const bank of [CORE, RETRY]){
+  for(const [number, order] of Object.entries(OPTION_ORDERS)){
+    const q=bank[Number(number)-1]; const old=q.choices.slice();
+    q.choices=order.map(i=>old[i]); q.correct=order.indexOf(q.correct);
+  }
+}
+let active = CORE.map(q=>({...q}));
+let answered=false;
+let attempt=1;
+let completed=[];
+let retried=false;
+
+function safe(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));}
+function idFor(q){return `q${q.n}`;}
+function radioVal(name){const checked=document.querySelector(`input[name="${name}"]:checked`);return checked?checked.value:null;}
+function getAnswer(q){const s=radioVal(`ans-${idFor(q)}`);return s===null?null:Number(s);}
+function getConfidence(q){return radioVal(`conf-${idFor(q)}`);}
+function getReason(q){const el=document.getElementById(`reason-q${q.n}`);return el?el.value.trim():'';}
+function getDraft(q){const el=document.getElementById(`draft-q${q.n}`);return el?el.value.trim():'';}
+function updateProgress(){const a=active.filter(q=>getAnswer(q)!==null).length;const c=active.filter(q=>getConfidence(q)!==null).length;document.getElementById('progressText').textContent=`${a} of ${active.length} answers · ${c} of ${active.length} confidence ratings`;document.getElementById('fill').style.width=`${100*(a+c)/(2*active.length)}%`;}
+function render(){
+  let prev=''; const output=[];
+  for(const q of active){
+    if(q.round!==prev){prev=q.round; output.push(`<div class="round-title"><h2>${safe(q.round)}</h2></div>`);}
+    const choices=q.choices.map((s,i)=>`<label class="choice"><input type="radio" name="ans-q${q.n}" value="${i}" aria-describedby="feedback-q${q.n}"><span>${safe(s)}</span></label>`).join('');
+    const content=q.planPremises?`<div aria-label="Proof-planning space"><pre class="proof plan-premises">${safe(q.planPremises)}</pre><div class="plan-work"><textarea id="draft-q${q.n}" aria-label="Optional proof sketch for question ${q.n}" placeholder="Sketch possible proof lines here (optional)." spellcheck="false"></textarea></div><div class="plan-goal">∴  ${safe(q.goal)}  <span style="font-family:system-ui;font-weight:400;font-size:.83rem">(goal)</span></div></div>`:q.proof?`<pre class="proof" aria-label="Numbered proof fragment">${safe(q.proof)}</pre>`:q.formula?`<div class="formula">${safe(q.formula)}</div>`:'';
+    const reason=q.needReason?`<label class="reason-label" for="reason-q${q.n}">Why does your chosen rule fit this goal? (briefly explain)</label><textarea id="reason-q${q.n}" class="reason-input" placeholder="Explain your strategy and what assumption(s) you would open..." aria-label="Reason for question ${q.n}"></textarea><p class="reason-hint">Required for proof-planning questions. Your reasoning is sent to ALEX, not automatically graded.</p>`:'';
+    output.push(`<section class="question" id="card-q${q.n}"><div class="qhead"><span class="qnum">Question ${q.n} of ${active.length}</span></div><h3 class="qtitle">${safe(q.title)}</h3><p>${safe(q.stem)}</p>${content}<fieldset><legend>Choose one answer</legend>${choices}</fieldset>${reason}<fieldset class="confidence"><legend>How confident are you?</legend><div class="confidence-options"><label><input type="radio" name="conf-q${q.n}" value="Not sure"> Not sure</label><label><input type="radio" name="conf-q${q.n}" value="Pretty sure"> Pretty sure</label><label><input type="radio" name="conf-q${q.n}" value="Very sure"> Very sure</label></div></fieldset><div id="feedback-q${q.n}" class="feedback" aria-live="polite"></div></section>`);
+  }
+  document.getElementById('quiz').innerHTML=output.join('\n');
+  document.getElementById('quiz').addEventListener('change',updateProgress,{once:false});
+  updateProgress();
+}
+function check(){
+  if(answered)return;
+  const missing=active.filter(q=>getAnswer(q)===null||getConfidence(q)===null||(q.needReason && getReason(q).length<12));
+  const warn=document.getElementById('warning');
+  if(missing.length){warn.textContent=`Complete every answer and confidence rating, and add a short explanation (at least 12 characters) to each proof-planning question. ${missing.length} question${missing.length===1?' is':'s are'} still incomplete.`;warn.classList.add('show');warn.scrollIntoView({block:'center'});return;}
+  warn.classList.remove('show');
+  answered=true;
+  const snap=active.map(q=>({...q,student:getAnswer(q),confidence:getConfidence(q),reason:getReason(q),draft:getDraft(q),isCorrect:getAnswer(q)===q.correct}));
+  completed.push({attempt,items:snap});
+  for(const q of snap){
+    const card=document.getElementById(`card-q${q.n}`);
+    card.classList.add(q.isCorrect?'correct':'incorrect');
+    const box=document.getElementById(`feedback-q${q.n}`);
+    const text=q.isCorrect?'Correct': 'Not yet';
+    const cls=q.isCorrect?'correct-word':'incorrect-word';
+    box.innerHTML=`<strong class="${cls}">${text}.</strong> ${q.isCorrect?'':`Your answer: <strong>${safe(q.choices[q.student])}</strong>. Correct answer: <strong>${safe(q.choices[q.correct])}</strong>. `}${safe(q.explain)}`;
+    box.classList.add('show');
+    card.querySelectorAll('input, textarea').forEach(i=>i.disabled=true);
+  }
+  document.getElementById('check').disabled=true;
+  document.getElementById('generate').disabled=false;
+  document.getElementById('retry').disabled=retried||!snap.some(q=>!q.isCorrect);
+  showResults(snap);
+  document.getElementById('results').scrollIntoView({block:'start'});
+}
+function showResults(snap){
+  const good=snap.filter(q=>q.isCorrect).length;
+  document.getElementById('score').textContent=`${good} / ${snap.length} correct · ${Math.round(100*good/snap.length)}%`;
+  const groups={};
+  for(const q of snap){if(!groups[q.skill])groups[q.skill]={ok:0,count:0,high:0};const x=groups[q.skill];x.count++;if(q.isCorrect)x.ok++;if(!q.isCorrect&&q.confidence==='Very sure')x.high++;}
+  document.getElementById('skills').innerHTML=Object.entries(groups).map(([name,x])=>{const ratio=x.ok/x.count; const label=ratio===1?'Secure on this attempt':ratio>=.5?'Needs reinforcement':'Priority for review';const cls=ratio===1?'mark-good':ratio>=.5?'mark-mid':'mark-bad';return `<div class="skill"><strong>${safe(name)}</strong><span>${x.ok}/${x.count}</span><span class="status ${cls}">${label}${x.high?` · ${x.high} confident error${x.high>1?'s':''}`:''}</span></div>`;}).join('');
+  document.getElementById('nextSteps').textContent=good===snap.length?'All answers were correct. Generate the ALEX prompt for a short transfer challenge, or reset to revisit the full set.':retried?'Generate your ALEX debrief: it will include both your initial and retry attempts.':'Choose Retry Missed Questions for new parallel items, or Generate ALEX Debrief for personalized tutoring.';
+  document.getElementById('results').classList.add('show');
+}
+function retry(){
+  if(!answered||retried)return;
+  const miss=completed[completed.length-1].items.filter(q=>!q.isCorrect);
+  if(!miss.length)return;
+  retried=true;attempt=2;answered=false;
+  active=miss.map((q,i)=>({...CORE[q.n-1],...RETRY[q.n-1],n:i+1,origin:q.n,round:'Retry · new examples for missed skills',title:`New example: ${CORE[q.n-1].title}`,skill:q.skill}));
+  document.getElementById('attemptName').textContent=`Retry · ${active.length} new question${active.length!==1?'s':''}`;
+  document.getElementById('results').classList.remove('show');
+  document.getElementById('promptPanel').classList.remove('show');
+  document.getElementById('check').disabled=false;
+  document.getElementById('retry').disabled=true;
+  document.getElementById('generate').disabled=true;
+  document.getElementById('warning').classList.remove('show');
+  render();
+  document.getElementById('quiz').scrollIntoView({block:'start'});
+}
+function makePrompt(){
+  if(!answered)return;
+  const attempts=completed.map(at=>{const good=at.items.filter(q=>q.isCorrect).length;let lines=[`ATTEMPT ${at.attempt}: ${good}/${at.items.length} correct`];for(const q of at.items){lines.push(`- ${q.title} [${q.skill}]\n  Question: ${q.stem}${q.formula?' '+q.formula:''}${q.proof?'\n'+q.proof:''}${q.planPremises?'\nPremises:\n'+q.planPremises+'\nGoal: '+q.goal:''}\n  My answer: ${q.choices[q.student]}\n  Correct answer: ${q.choices[q.correct]}\n  Result: ${q.isCorrect?'CORRECT':'INCORRECT'}\n  Confidence: ${q.confidence}${q.reason?'\n  My explanation (not auto-graded): '+q.reason:''}${q.draft?'\n  My draft proof (not auto-graded):\n'+q.draft:''}\n  Feedback: ${q.explain}`);}return lines.join('\n\n');}).join('\n\n');
+  const last=completed[completed.length-1].items;
+  const high=completed.flatMap(x=>x.items).filter(q=>!q.isCorrect&&q.confidence==='Very sure');
+  const fragile=last.filter(q=>q.isCorrect&&q.confidence==='Not sure');
+  const prompt=`You are my ALEX: a Socratic tutoring assistant for introductory Symbolic Logic (PHIL 106). I just completed a 19-question Proof Clinic on the basic derivation system SD. We are learning to construct and evaluate derivations, not merely to recognize logical operators. Help me improve my own independent proof skills.\n\nMY DIAGNOSTIC RECORD\n${attempts}\n\nPriority signals:\n- High-confidence errors across attempts: ${high.length}.\n- Correct but low-confidence responses on latest attempt: ${fragile.length}.\n- If I used a retry, distinguish initial errors from what I subsequently corrected.\n\nCOURSE KNOWLEDGE BASE (AUTHORITATIVE FOR THIS EXERCISE)\nNotation: ~ negation; & conjunction; ∨ inclusive disjunction; ⊃ conditional; ≡ biconditional. A compound sentence has a MAIN connective, even if other connectives occur inside it. A direct elimination rule must match the main connective of the available whole line, not merely an embedded operator.\n\nBasic SD direct rules:\n- &E (Conjunction Elimination): From an accessible P & Q, derive either full conjunct P or full conjunct Q. Do not extract a constituent *inside* one of these conjuncts in the same step.\n- &I (Conjunction Introduction): From accessible P and Q, derive P & Q; cite both lines.\n- ∨I (Disjunction Introduction): From an accessible P, derive P ∨ Q (or Q ∨ P).\n- ⊃E (Conditional Elimination): From P ⊃ Q and P on accessible lines, derive the complete consequent Q; cite both lines.\n- ≡E (Biconditional Elimination): From P ≡ Q and one of its sides, infer the other; cite the necessary accessible lines.\n- R (Reiteration): Repeat a line only if it is still accessible.\n\nSubderivation rules:\n- ⊃I (Conditional Introduction): Start a subderivation with assumption P, derive Q inside it, then end that subderivation. Outside it, derive P ⊃ Q, citing the entire range from assumed P through derived Q.\n- ≡I: Establish both directions with appropriate subderivations, and cite both complete ranges.\n- ~I: Assume P and derive a contradiction (a sentence and its negation); then discharge the assumption to infer ~P.\n- ~E: Assume ~P and derive a contradiction (a sentence and its negation); then discharge the assumption to infer P.\n- ∨E: For P ∨ Q, use separate subderivations starting with P and Q to derive the same target R; then cite the disjunction and both complete subderivations to infer R.\n\nSubderivation scope:\n- A vertical bar │ in our practice represents one open subderivation; │ │ means a nested one.\n- When the inner subderivation ends, move ONE indentation level left; the enclosing subderivation may remain open.\n- A line inside a closed subderivation is not directly accessible outside it. An outer accessible premise remains accessible. A closed subderivation may be cited AS A WHOLE where a subderivation rule requires it.\n- Every derived line needs the actual applicable rule AND complete, accurate line citations/ranges. Getting a true or logically implied result is not enough if the line is improperly justified.\n- These are basic SD rules. Do NOT silently introduce shortcut rules from SD+ such as hypothetical syllogism (HS), modus tollens (MT), or disjunctive syllogism (DS) as direct inference rules.\n\nTASK TYPES IN MY COURSE\n(1) Demonstrate validity by deriving a conclusion from assumptions/premises.\n(2) Prove a theorem by deriving a sentence with all temporary assumptions ultimately discharged.\n(3) Prove a set inconsistent by deriving a sentence and its negation from the assumptions.\n\nRULES OF ENGAGEMENT\n0. For the proof-planning items, read my own written explanation and draft proof (if provided); these were not auto-graded. Evaluate them carefully rather than assuming that a correct multiple-choice selection proves that my reasoning is correct. If my written plan conflicts with my selected answer, ask about it.\n1. Begin by inspecting my actual errors and my confidence ratings. Prioritize confidently held misconceptions, then other errors, then low-confidence correct answers.\n2. Diagnose before teaching: ask ONE short question about my reasoning; wait for my response. Do not start with a lecture or a complete worked proof.\n3. Be concise: usually a short paragraph and one question at a time.\n4. If I am wrong, first ask a guiding question, then provide progressively more revealing hints. Only after sustained difficulty give a short explanation and ask me to apply it.\n5. Prefer new examples containing embedded compounds, such as A ⊃ [B & (C ∨ D)], over simple constant-operator-constant examples. Make sure the main connective and grouping are unambiguous.\n6. Probe distinctions between main and embedded operators; direct line citations and subderivation ranges; inner vs outer indentation; and accessible vs inaccessible lines.\n7. Make all example proofs syntactically legitimate in SD. Clearly mark premises/assumptions and indentation. Never present an invalid inference as a valid one unless explicitly labeling it as an error to debug.\n8. Use new examples rather than solving my current assigned homework problems. Ask me to identify errors, give repairs, or supply a justified next step.\n9. Keep exact course notation and rules; do not replace them with alternate textbook names unless you also give the course name.\n10. After weaknesses improve, conduct a FIVE-ITEM mastery check: (a) apply a rule correctly to a nested compound; (b) manage indentation and give a full range citation; (c) distinguish ~I from ~E; (d) choose between ≡I and ∨E using two-case/two-direction reasoning; (e) diagnose or repair a flawed proof step. Use new, reasonably short examples. Across tutoring and the mastery check, cover all five subderivation rules ⊃I, ~I, ~E, ≡I, ∨E, emphasizing any that I missed. Present ONE item at a time. Require a correct answer and brief explanation. If I miss one, coach and replace that item with a new parallel problem.\n11. When I correctly explain all five mastery items, summarize my most important improvement in at most 3 sentences. End with this exact sentence: ALEX complete. You may return to the course. Do not ask another question after that.\n\nBEGIN: Review my results and ask your first single diagnostic question.`;
+  document.getElementById('prompt').value=prompt;
+  document.getElementById('promptPanel').classList.add('show');
+  document.getElementById('promptPanel').scrollIntoView({block:'start'});
+}
+function reset(){answered=false;retried=false;attempt=1;completed=[];active=CORE.map(q=>({...q}));document.getElementById('attemptName').textContent=`Independent attempt · ${CORE.length} questions`;document.getElementById('check').disabled=false;document.getElementById('retry').disabled=true;document.getElementById('generate').disabled=true;document.getElementById('results').classList.remove('show');document.getElementById('promptPanel').classList.remove('show');document.getElementById('warning').classList.remove('show');document.getElementById('copyMessage').textContent='';render();window.scrollTo({top:0});}
+async function copy(){const text=document.getElementById('prompt').value;try{await navigator.clipboard.writeText(text);document.getElementById('copyMessage').textContent='Copied. Paste the prompt into your LLM conversation.';}catch(e){const box=document.getElementById('prompt');box.focus();box.select();document.getElementById('copyMessage').textContent='Select and copy the highlighted text (⌘C on Mac, Ctrl+C on Windows).';}}
+document.getElementById('check').addEventListener('click',check);
+document.getElementById('retry').addEventListener('click',retry);
+document.getElementById('generate').addEventListener('click',makePrompt);
+document.getElementById('reset').addEventListener('click',reset);
+document.getElementById('copy').addEventListener('click',copy);
+render();
+</script>
+</body>
+</html>
